@@ -1,5 +1,11 @@
 const express = require('express');
-const { login } = require('../controllers/authController');
+const { createShortUrl, redirectUrl } = require('../controllers/urlController');
 const router = express.Router();
-router.post('/login', login);
+
+// Create Short URL
+router.post('/', createShortUrl);
+
+// Redirect to original URL
+router.get('/:alias', redirectUrl);
+
 module.exports = router;
