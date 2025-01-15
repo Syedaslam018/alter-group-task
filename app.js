@@ -1,10 +1,6 @@
-// Step 1: Set up a new Node.js project and install necessary dependencies
-// Dependencies: Express, Mongoose, Redis, JWT, Google Sign-In, Rate Limiter, Docker, Swagger
 const express = require('express');
 const mongoose = require('mongoose');
 const Redis = require('ioredis');
-const jwt = require('jsonwebtoken');
-const { OAuth2Client } = require('google-auth-library');
 const rateLimit = require('express-rate-limit');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
@@ -15,7 +11,6 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 const redisClient = new Redis();
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Middleware setup
 app.use(express.json());
@@ -52,93 +47,13 @@ mongoose.connect(process.env.MONGO_URI, {
 mongoose.connection.on('connected', () => console.log('MongoDB connected.'));
 mongoose.connection.on('error', (err) => console.error('MongoDB connection error:', err));
 
-// Define Mongoose schemas
-const userSchema = new mongoose.Schema({
-  googleId: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
-  name: { type: String },
-  picture: { type: String },
-}, { timestamps: true });
-
-const User = mongoose.model('User', userSchema);
-
-// User Authentication Route
-const authRoutes = express.Router();
-
-/**
- * @swagger
- * /api/auth/login:
- *   post:
- *     summary: Login via Google Sign-In
- *     description: Authenticate a user using Google Sign-In and return a JWT token.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               token:
- *                 type: string
- *                 description: Google ID token.
- *     responses:
- *       200:
- *         description: Successful authentication.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                   description: JWT token.
- *       400:
- *         description: Invalid ID token.
- */
-
-authRoutes.post('/login', async (req, res) => {
-  const { token } = req.body;
-  if (!token) {
-    return res.status(400).json({ message: 'Token is required.' });
-  }
-  try {
-    const ticket = await googleClient.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-    const payload = ticket.getPayload();
-    const googleId = payload.sub;
-
-    // Find or create user
-    let user = await User.findOne({ googleId });
-    if (!user) {
-      user = await User.create({
-        googleId,
-        email: payload.email,
-        name: payload.name,
-        picture: payload.picture,
-      });
-    }
-
-    // Create JWT token
-    const jwtToken = jwt.sign(
-      { userId: user._id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
-    res.status(200).json({ token: jwtToken });
-  } catch (error) {
-    console.error('Google Sign-In error:', error);
-    res.status(400).json({ message: 'Invalid Google ID token.' });
-  }
-});
-
-app.use('/api/auth', authRoutes);
-
-// Routes setup
+// Import routes
+const authRoutes = require('./routes/auth');
 const urlRoutes = require('./routes/url');
 const analyticsRoutes = require('./routes/analytics');
+
+// Use routes
+app.use('/api/auth', authRoutes);
 app.use('/api/shorten', urlRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
@@ -158,3 +73,16 @@ app.listen(port, () => console.log(`Server running on port ${port}`));
 // Deployment scripts to be added for AWS/Heroku.
 
 // Note: Detailed implementation of each route, schemas, and tests will be added in respective modules.
+
+// Folder Structure:
+// - routes/
+//   - auth.js
+//   - url.js
+//   - analytics.js
+// - controllers/
+//   - authController.js
+//   - urlController.js
+//   - analyticsController.js
+// - models/
+//   - User.js
+//   - Url.js
