@@ -1,44 +1,42 @@
-const geoip = require('geoip-lite');
-const Url = require('../models/Url');
-const redisClient = require('../redisClient');
-const Analytics = require('../models/Analytics');
+const { OAuth2Client } = require('google-auth-library');
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-exports.redirectUrl = async (req, res) => {
-  const { alias } = req.params;
+exports.login = async (req, res) => {
+  const { token } = req.body;
+  if (!token) {
+    return res.status(400).json({ message: 'Token is required.' });
+  }
   try {
-    // Check Redis cache first
-    let longUrl = await redisClient.get(alias);
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const googleId = payload.sub;
 
-    if (!longUrl) {
-      const url = await Url.findOne({ alias });
-      if (!url) {
-        return res.status(404).json({ message: 'URL not found.' });
-      }
-      longUrl = url.longUrl;
-
-      // Cache the long URL
-      await redisClient.set(alias, longUrl);
+    // Find or create user
+    let user = await User.findOne({ googleId });
+    if (!user) {
+      user = await User.create({
+        googleId,
+        email: payload.email,
+        name: payload.name,
+        picture: payload.picture,
+      });
     }
 
-    // Collect analytics data
-    const userAgent = req.headers['user-agent'];
-    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    const geo = geoip.lookup(ip) || {};
+    // Create JWT token
+    const jwtToken = jwt.sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
 
-    await Analytics.create({
-      alias,
-      timestamp: new Date(),
-      userAgent,
-      ip,
-      country: geo.country || 'Unknown',
-      region: geo.region || 'Unknown',
-      city: geo.city || 'Unknown',
-    });
-
-    // Redirect to the long URL
-    res.redirect(longUrl);
+    res.status(200).json({ token: jwtToken });
   } catch (error) {
-    console.error('Error redirecting URL:', error);
-    res.status(500).json({ message: 'Internal server error.' });
+    console.error('Google Sign-In error:', error);
+    res.status(400).json({ message: 'Invalid Google ID token.' });
   }
 };

@@ -2,12 +2,12 @@ const mongoose = require('mongoose');
 
 const analyticsSchema = new mongoose.Schema({
   alias: { type: String, required: true },
-  timestamp: { type: Date, required: true },
-  userAgent: { type: String, required: true },
-  ip: { type: String, required: true },
-  country: { type: String },
-  region: { type: String },
-  city: { type: String },
+  timestamp: { type: Date, default: Date.now },
+  userAgent: { type: String },
+  ipAddress: { type: String },
+  osType: { type: String },
+  deviceType: { type: String },
+  location: { type: String },
 });
 
 module.exports = mongoose.model('Analytics', analyticsSchema);

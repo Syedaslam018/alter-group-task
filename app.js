@@ -10,7 +10,11 @@ dotenv.config();
 // Configurations
 const app = express();
 const port = process.env.PORT || 3000;
-const redisClient = new Redis();
+const redisClient = new Redis({
+    host: process.env.REDIS_HOST || '127.0.0.1',
+    port: process.env.REDIS_PORT || 6379,
+  });
+  
 
 // Middleware setup
 app.use(express.json());
@@ -50,12 +54,12 @@ mongoose.connection.on('error', (err) => console.error('MongoDB connection error
 // Import routes
 const authRoutes = require('./routes/auth');
 const urlRoutes = require('./routes/url');
-const analyticsRoutes = require('./routes/analytics');
+// const analyticsRoutes = require('./routes/analytics');
 
 // Use routes
 app.use('/api/auth', authRoutes);
 app.use('/api/shorten', urlRoutes);
-app.use('/api/analytics', analyticsRoutes);
+// app.use('/api/analytics', analyticsRoutes);
 
 // Start server
 app.listen(port, () => console.log(`Server running on port ${port}`));
