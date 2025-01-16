@@ -10,10 +10,18 @@ dotenv.config();
 // Configurations
 const app = express();
 const port = process.env.PORT || 3000;
-const redisClient = new Redis({
-    host: process.env.REDIS_HOST, 
-    port: process.env.REDIS_PORT 
-  });
+const redis = require('redis');
+const client = redis.createClient({
+  url: 'redis://redis:6379'  // Use the service name 'redis'
+});
+// const redis = new Redis({
+//     host: process.env.REDIS_HOST || 'redis' , 
+//     port: process.env.REDIS_PORT 
+//   });
+
+//   redis.on('connect', () => {
+//     console.log('Connected to Redis');
+// });
   
 
 // Middleware setup

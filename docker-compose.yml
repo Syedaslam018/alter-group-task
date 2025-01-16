@@ -17,7 +17,7 @@ services:
       PORT: 9000
       MONGO_URI: 'mongodb+srv://syedaslam1841:GRBVYk9IadDc6uVA@cluster0.n7tc4.mongodb.net/?retryWrites=true&w=majority&appName=cluster0'
       BASE_URL: http://localhost:9000
-      REDIS_HOST: redis
+      REDIS_HOST: 'redis'
       REDIS_PORT: 6379
     depends_on:
       - redis
