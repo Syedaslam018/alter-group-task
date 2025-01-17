@@ -1,0 +1,7 @@
+[build]
+  command = "npm install && npm run build"
+  publish = "public"
+
+[[functions]]
+  directory = "functions"
+  external_node_modules = ["mongoose", "ioredis", "jsonwebtoken", "express-rate-limit", "dotenv"]
