@@ -19,6 +19,7 @@
     "ioredis": "^5.4.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
+    "netlify-cli": "^18.0.1",
     "redis": "^4.7.0",
     "serverless-http": "^3.2.0",
     "swagger-jsdoc": "^6.2.8",
