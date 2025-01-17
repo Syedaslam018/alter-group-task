@@ -1,5 +1,5 @@
 const express = require('express');
-const { getUrlAnalytics } = require('../controllers/analyticsController');
+const { getUrlAnalytics, getTopicAnalytics, getOverallAnalytics} = require('../controllers/analyticsController');
 const router = express.Router();
 
 // Get URL analytics
@@ -31,35 +31,35 @@ router.get('/:alias', getUrlAnalytics);
  * @swagger
  * /api/analytics/topic/{topic}:
  *   get:
- *     summary: Get analytics for URLs grouped under a specific topic
- *     tags: [Analytics]
+ *     summary: Get analytics for a specific topic.
  *     parameters:
- *       - in: path
- *         name: topic
+ *       - name: topic
+ *         in: path
  *         required: true
+ *         description: The topic to retrieve analytics for.
  *         schema:
  *           type: string
- *         description: Topic or category of the URLs.
  *     responses:
  *       200:
- *         description: Topic analytics retrieved successfully.
+ *         description: Successfully retrieved topic analytics.
+ *       404:
+ *         description: Topic not found.
  *       500:
  *         description: Internal server error.
  */
+router.get('/topic/:topic', getTopicAnalytics);
 
 /**
  * @swagger
  * /api/analytics/overall:
  *   get:
- *     summary: Get overall analytics for the authenticated user's URLs
- *     tags: [Analytics]
+ *     summary: Get overall analytics for all topics.
  *     responses:
  *       200:
- *         description: Overall analytics retrieved successfully.
- *       401:
- *         description: Unauthorized access.
+ *         description: Successfully retrieved overall analytics.
  *       500:
  *         description: Internal server error.
  */
+router.get('/overall', getOverallAnalytics);
 
 module.exports = router;

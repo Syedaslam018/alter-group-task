@@ -1,3 +1,4 @@
+const Url = require('../models/Url');
 exports.getUrlAnalytics = async (req, res) => {
     const { alias } = req.params;
     try {
@@ -33,4 +34,40 @@ exports.getUrlAnalytics = async (req, res) => {
       res.status(500).json({ message: 'Internal server error.' });
     }
   };
-  
+
+exports.getTopicAnalytics = async (req, res) => {
+  const { topic } = req.params;
+  try {
+    const urls = await Url.find({ topic });
+    if (!urls.length) {
+      return res.status(404).json({ message: 'No analytics found for this topic.' });
+    }
+
+    const totalClicks = urls.reduce((sum, url) => sum + (url.clickCount || 0), 0);
+
+    res.status(200).json({
+      topic,
+      totalUrls: urls.length,
+      totalClicks,
+    });
+  } catch (error) {
+    console.error('Error retrieving topic analytics:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+
+exports.getOverallAnalytics = async (req, res) => {
+  try {
+    const urls = await Url.find({});
+    const totalClicks = urls.reduce((sum, url) => sum + (url.clickCount || 0), 0);
+
+    res.status(200).json({
+      totalTopics: new Set(urls.map((url) => url.topic)).size,
+      totalUrls: urls.length,
+      totalClicks,
+    });
+  } catch (error) {
+    console.error('Error retrieving overall analytics:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};

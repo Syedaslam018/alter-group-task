@@ -39,34 +39,26 @@ exports.createShortUrl = async (req, res) => {
   
   exports.redirectUrl = async (req, res) => {
     const { alias } = req.params;
-    console.log(alias)
     try {
       let longUrl = await redisClient.get(alias);
-      console.log(longUrl)
+  
       if (!longUrl) {
-        const url = await Url.findOne({ alias:alias });
-        if (!url) return res.status(404).json({ message: 'URL not found.' });
+        const url = await Url.findOneAndUpdate(
+          { alias },
+          { $inc: { clickCount: 1 } }, // Increment click count
+          { new: true }
+        );
+        if (!url) {
+          return res.status(404).json({ message: 'URL not found.' });
+        }
         longUrl = url.longUrl;
+  
+        // Cache the long URL
         await redisClient.set(alias, longUrl);
+      } else {
+        // Increment click count directly in DB
+        await Url.findOneAndUpdate({ alias }, { $inc: { clickCount: 1 } });
       }
-  
-      // Log analytics
-      const userAgent = req.headers['user-agent'];
-      const ipAddress = req.ip || req.connection.remoteAddress;
-      const location = geoip.lookup(ipAddress);
-      const osType = userAgent.includes('Windows') ? 'Windows' : userAgent.includes('Mac') ? 'macOS' : 'Other';
-      const deviceType = /mobile/i.test(userAgent) ? 'Mobile' : 'Desktop';
-  
-      const analyticsData = {
-        alias,
-        userAgent,
-        ipAddress,
-        osType,
-        deviceType,
-        location: location ? `${location.city}, ${location.country}` : 'Unknown',
-      };
-  
-      await Analytics.create(analyticsData);
   
       res.redirect(longUrl);
     } catch (error) {
@@ -74,4 +66,5 @@ exports.createShortUrl = async (req, res) => {
       res.status(500).json({ message: 'Internal server error.' });
     }
   };
+  
   

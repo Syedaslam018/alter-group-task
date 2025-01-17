@@ -1,12 +1,12 @@
 const express = require('express');
-const { login } = require('../controllers/authController');
+const { signup, login } = require('../controllers/authController');
 const router = express.Router();
+
 /**
  * @swagger
- * /api/auth/google:
+ * /api/auth/signup:
  *   post:
- *     summary: Authenticate user via Google Sign-In
- *     tags: [Authentication]
+ *     summary: Sign up a new user.
  *     requestBody:
  *       required: true
  *       content:
@@ -14,17 +14,46 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               idToken:
+ *               username:
  *                 type: string
- *                 description: The ID token from Google Sign-In.
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
  *     responses:
- *       200:
- *         description: Successfully authenticated.
+ *       201:
+ *         description: User signed up successfully.
  *       400:
- *         description: Invalid token or authentication failed.
+ *         description: Validation error or user already exists.
  *       500:
  *         description: Internal server error.
  */
+router.post('/signup', signup);
 
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Login an existing user.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User logged in successfully.
+ *       401:
+ *         description: Invalid credentials.
+ *       500:
+ *         description: Internal server error.
+ */
 router.post('/login', login);
+
 module.exports = router;

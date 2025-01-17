@@ -5,23 +5,20 @@ const rateLimit = require('express-rate-limit');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const dotenv = require('dotenv');
+const { authenticate } = require('./middleware/auth');
 dotenv.config();
 
 // Configurations
 const app = express();
 const port = process.env.PORT || 3000;
-const redis = require('redis');
-const client = redis.createClient({
-  url: 'redis://redis:6379'  // Use the service name 'redis'
-});
-// const redis = new Redis({
-//     host: process.env.REDIS_HOST || 'redis' , 
-//     port: process.env.REDIS_PORT 
-//   });
+const redis = new Redis({
+    host: process.env.REDIS_HOST , 
+    port: process.env.REDIS_PORT 
+  });
 
-//   redis.on('connect', () => {
-//     console.log('Connected to Redis');
-// });
+  redis.on('connect', () => {
+    console.log('Connected to Redis');
+});
   
 
 // Middleware setup
@@ -66,11 +63,18 @@ const analyticsRoutes = require('./routes/analytics');
 
 // Use routes
 app.use('/api/auth', authRoutes);
-app.use('/api/shorten', urlRoutes);
-app.use('/api/analytics', analyticsRoutes);
+
+// Secure routes
+app.use('/api/shorten', authenticate, urlRoutes);
+app.use('/api/analytics', authenticate, analyticsRoutes);
+
 
 // Start server
-app.listen(port, () => console.log(`Server running on port ${port}`));
+// app.listen(port, () => console.log(`Server running on port ${port}`));
+
+const serverless = require('serverless-http');
+module.exports.handler = serverless(app);
+
 
 // Dockerize application
 // Dockerfile
