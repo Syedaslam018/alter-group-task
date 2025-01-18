@@ -72,11 +72,11 @@ app.use('/api/shorten', authenticate, urlRoutes);
 app.use('/api/analytics', authenticate, analyticsRoutes);
 
 
-// Start server
-// app.listen(port, () => console.log(`Server running on port ${port}`));
+//Start server
+app.listen(port, () => console.log(`Server running on port ${port}`));
 
-const serverless = require('serverless-http');
-module.exports.handler = serverless(app);
+// const serverless = require('serverless-http');
+// module.exports.handler = serverless(app);
 
 
 // Dockerize application
