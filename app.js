@@ -1,11 +1,11 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const Redis = require('ioredis');
-const rateLimit = require('express-rate-limit');
-const swaggerJsDoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
-const dotenv = require('dotenv');
-const { authenticate } = require('./middleware/auth');
+import express from 'express';
+import mongoose from 'mongoose';
+import Redis from 'ioredis';
+import rateLimit from 'express-rate-limit';
+import swaggerJsDoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+import dotenv from 'dotenv';
+import { authenticate } from './middleware/auth.js';
 dotenv.config();
 
 // Configurations
@@ -20,24 +20,24 @@ const port = process.env.PORT || 3000;
 //     console.log('Connected to Redis');
 // });
 
-import { createClient } from 'redis';
+// const client = createClient({
+//     username: 'default',
+//     password: 'WCrbnd8cITU4cTua1phzKszikbQ5MFDJ',
+//     socket: {
+//         host: 'redis-12868.c61.us-east-1-3.ec2.redns.redis-cloud.com',
+//         port: 12868
+//     }
+// });
 
-const client = createClient({
-    username: 'default',
-    password: 'WCrbnd8cITU4cTua1phzKszikbQ5MFDJ',
-    socket: {
-        host: 'redis-12868.c61.us-east-1-3.ec2.redns.redis-cloud.com',
-        port: 12868
-    }
-});
+// client.on('error', err => console.log('Redis Client Error', err));
 
-client.on('error', err => console.log('Redis Client Error', err));
+// await client.connect('connect', () => {
+//     console.log('Connected to Redis');
+// });
 
-await client.connect();
-
-await client.set('foo', 'bar');
-const result = await client.get('foo');
-console.log(result)  // >>> bar
+// await client.set('foo', 'bar');
+// const result = await client.get('foo');
+// console.log(result)  // >>> bar
 
 
   
@@ -78,9 +78,9 @@ mongoose.connection.on('connected', () => console.log('MongoDB connected.'));
 mongoose.connection.on('error', (err) => console.error('MongoDB connection error:', err));
 
 // Import routes
-const authRoutes = require('./routes/auth');
-const urlRoutes = require('./routes/url');
-const analyticsRoutes = require('./routes/analytics');
+import authRoutes from './routes/auth.js';
+import urlRoutes from './routes/url.js';
+import analyticsRoutes from './routes/analytics.js';
 
 // Use routes
 app.use('/api/auth', authRoutes);
