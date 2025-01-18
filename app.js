@@ -5,7 +5,7 @@ const rateLimit = require('express-rate-limit');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const dotenv = require('dotenv');
-const { authenticate } = require('../middleware/auth');
+const { authenticate } = require('./middleware/auth');
 dotenv.config();
 
 // Configurations
@@ -57,12 +57,15 @@ mongoose.connection.on('connected', () => console.log('MongoDB connected.'));
 mongoose.connection.on('error', (err) => console.error('MongoDB connection error:', err));
 
 // Import routes
-const authRoutes = require('../routes/auth');
-const urlRoutes = require('../routes/url');
-const analyticsRoutes = require('../routes/analytics');
+const authRoutes = require('./routes/auth');
+const urlRoutes = require('./routes/url');
+const analyticsRoutes = require('./routes/analytics');
 
 // Use routes
 app.use('/api/auth', authRoutes);
+app.use('/',(req,res) => {
+  res.send({success: "Hello World"})
+})
 
 // Secure routes
 app.use('/api/shorten', authenticate, urlRoutes);
