@@ -1,11 +1,11 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import Redis from 'ioredis';
-import rateLimit from 'express-rate-limit';
-import swaggerJsDoc from 'swagger-jsdoc';
-import swaggerUi from 'swagger-ui-express';
-import dotenv from 'dotenv';
-import { authenticate } from './middleware/auth.js';
+const express = require('express');
+const mongoose = require('mongoose');
+const Redis = require('ioredis');
+const rateLimit = require('express-rate-limit');
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+const dotenv = require('dotenv');
+const { authenticate } = require('./middleware/auth'); // Note: No need for .js in CommonJS
 dotenv.config();
 
 // Configurations
@@ -78,9 +78,9 @@ mongoose.connection.on('connected', () => console.log('MongoDB connected.'));
 mongoose.connection.on('error', (err) => console.error('MongoDB connection error:', err));
 
 // Import routes
-import authRoutes from './routes/auth.js';
-import urlRoutes from './routes/url.js';
-import analyticsRoutes from './routes/analytics.js';
+const authRoutes = require('./routes/auth'); // No need for .js in CommonJS
+const urlRoutes = require('./routes/url');   // No need for .js in CommonJS
+const analyticsRoutes = require('./routes/analytics'); // No need for .js in CommonJS
 
 // Use routes
 app.use('/api/auth', authRoutes);
