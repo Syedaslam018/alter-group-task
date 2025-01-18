@@ -11,14 +11,35 @@ dotenv.config();
 // Configurations
 const app = express();
 const port = process.env.PORT || 3000;
-const redis = new Redis({
-    host: process.env.REDIS_HOST , 
-    port: process.env.REDIS_PORT 
-  });
+// const redis = new Redis({
+//     host: process.env.REDIS_HOST , 
+//     port: process.env.REDIS_PORT 
+//   });
 
-  redis.on('connect', () => {
-    console.log('Connected to Redis');
+//   redis.on('connect', () => {
+//     console.log('Connected to Redis');
+// });
+
+import { createClient } from 'redis';
+
+const client = createClient({
+    username: 'default',
+    password: 'WCrbnd8cITU4cTua1phzKszikbQ5MFDJ',
+    socket: {
+        host: 'redis-12868.c61.us-east-1-3.ec2.redns.redis-cloud.com',
+        port: 12868
+    }
 });
+
+client.on('error', err => console.log('Redis Client Error', err));
+
+await client.connect();
+
+await client.set('foo', 'bar');
+const result = await client.get('foo');
+console.log(result)  // >>> bar
+
+
   
 
 // Middleware setup
